@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import "./App.css"; // Ensure you have this line to import the CSS
 
 const Board: React.FC = () => {
-  const [squares, setSquares] = useState<Array<string | null>>(Array(9).fill(null));
+  const [squares, setSquares] = useState<Array<string | null>>(
+    Array(9).fill(null)
+  );
   const [isXNext, setIsXNext] = useState(true);
 
   const handleClick = (i: number) => {
@@ -9,7 +12,7 @@ const Board: React.FC = () => {
     if (calculateWinner(newSquares) || newSquares[i] || isDraw(newSquares)) {
       return;
     }
-    newSquares[i] = isXNext ? 'X' : 'O';
+    newSquares[i] = isXNext ? "X" : "O";
     setSquares(newSquares);
     setIsXNext(!isXNext);
   };
@@ -27,7 +30,10 @@ const Board: React.FC = () => {
     );
   };
 
-  const winner = calculateWinner(squares);
+  const winnerInfo = calculateWinner(squares);
+  const winner = winnerInfo ? winnerInfo.winner : null;
+  const winningLine = winnerInfo ? winnerInfo.line : [];
+
   const draw = isDraw(squares);
   let status;
   if (winner) {
@@ -35,28 +41,31 @@ const Board: React.FC = () => {
   } else if (draw) {
     status = "It's a draw!";
   } else {
-    status = `Next player: ${isXNext ? 'X' : 'O'}`;
+    status = `Next player: ${isXNext ? "X" : "O"}`;
   }
 
   return (
     <div className="board-container">
       <div className="status">{status}</div>
-      <div className="board-row">
+      <div className="board">
         {renderSquare(0)}
         {renderSquare(1)}
         {renderSquare(2)}
-      </div>
-      <div className="board-row">
         {renderSquare(3)}
         {renderSquare(4)}
         {renderSquare(5)}
-      </div>
-      <div className="board-row">
         {renderSquare(6)}
         {renderSquare(7)}
         {renderSquare(8)}
+        {winner && (
+          <div
+            className={`winning-line winning-line-${winningLine.join("-")}`}
+          />
+        )}
       </div>
-      <button className="reset-button" onClick={handleReset}>Reset</button>
+      <button className="reset-button" onClick={handleReset}>
+        Reset
+      </button>
     </div>
   );
 };
@@ -75,14 +84,16 @@ const calculateWinner = (squares: Array<string | null>) => {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return { winner: squares[a], line: [a, b, c] };
     }
   }
   return null;
 };
 
 const isDraw = (squares: Array<string | null>) => {
-  return squares.every(square => square !== null) && !calculateWinner(squares);
+  return (
+    squares.every((square) => square !== null) && !calculateWinner(squares)
+  );
 };
 
 export default Board;
